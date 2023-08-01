@@ -1,0 +1,83 @@
+'''
+Data collected from 3B Meteo API. Parameters of Interest (PAOI):
+vento (raffica, danger threshold to be set),
+gelate ('t_min', threshold: <= 0),
+ondate calore ('t_max', danger threshold to be set)
+radiazione solare ('uv', threshold: 'descrizione uv'),
+lat e long per incrociare con altri dati.
+NOTE: Had to excluute altitude, latitude, longitude
+because Spark dataframe could not handle them
+TypeError: field latitude: Can not merge type <class 'pyspark.sql.types.StringType'> and <class 'pyspark.sql.types.DoubleType'>
+'''
+import csv
+import requests
+import pprint
+
+pp = pprint.PrettyPrinter(sort_dicts = False)
+
+filepath = '/home/giovanni/Scrivania/documentazione3b/loc_gb.csv'
+
+class meteo_connector:
+   def __init__(self, mypath):
+       self.mypath = mypath
+
+   def ids_cities(self):
+       '''
+       returns a list
+       of all cities ids
+       '''
+       res =  []
+       with open(self.mypath) as f:
+           my_reader = csv.reader(f, delimiter = ';')
+           next(my_reader)
+           for row in my_reader:
+               res.append(row[0])
+       return res
+
+   def info_dict(self):
+       '''
+       returns dictionary with
+       location names as keys,
+       dictionary with id and PAOI
+       as value.
+       '''
+       res =  {}
+       for id in self.ids_cities():
+           url = f'https://api.3bmeteo.com/publicv3/bollettino_meteo/previsioni_localita/{id}/1/en/daily/1?format=json2&X-API-KEY=0iMs6figaXNyc8JxnrMHQyqvYrSNh3WuoFvIZkXn'
+
+           response = requests.get(url)
+           if response.status_code == 200:
+               city_dict = response.json()
+
+               #preparing key of the final dict
+               city_name = city_dict['localita']['localita'] #KEY of the FINAL dict
+
+               #creating the dict to be used as VALUE of the FINAL dict
+               value_dict = {}
+               city_id = city_dict['localita']['id'] #as value of the value_dict
+               #city_alt = city_dict['localita']['altitudine'] #city altitude as value of the value_dict
+               #city_lat = city_dict['localita']['lat'] #city latitude as value of the value_dict
+               #city_lon = city_dict['localita']['lon'] #city longitude as value of the value_dict
+               day_forecast = city_dict['localita']['previsione_giorno']
+               dict_day_forecast = day_forecast[0]
+               city_tmin = dict_day_forecast['tempo_medio']['t_min'] #as value of the value_dict
+               city_tmax = dict_day_forecast['tempo_medio']['t_max'] #as value of the value_dict
+               city_uv = dict_day_forecast['tempo_medio']['descrizione_uv']['en'] #as value of the value_dict
+               city_wind = dict_day_forecast['tempo_medio']['raffica'] #as value of the value_dict
+               value_dict['id'] = city_id
+               #value_dict['altitude'] = city_alt
+               #value_dict['latitutde'] = city_lat
+               #value_dict['longtude'] = city_lon
+               value_dict['min_temp'] = city_tmin
+               value_dict['max_temp'] = city_tmax
+               value_dict['radiations'] = city_uv
+               value_dict['wind_kmh'] = city_wind
+
+               res[city_name] = value_dict
+
+       return res
+
+my_connector = meteo_connector(filepath)
+#print(type(my_connector.info_dict()))
+#print(my_connector.info_dict().items())
+#pp.pprint(my_connector.info_dict())
