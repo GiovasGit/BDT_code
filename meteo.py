@@ -1,21 +1,18 @@
 '''
 Data collected from 3B Meteo API. Parameters of Interest (PAOI):
-vento (raffica, danger threshold to be set),
-gelate ('t_min', threshold: <= 0),
-ondate calore ('t_max', danger threshold to be set)
-radiazione solare ('uv', threshold: 'descrizione uv'),
-lat e long per incrociare con altri dati.
-NOTE: Had to excluute altitude, latitude, longitude
-because Spark dataframe could not handle them
+wind 'strength' ('raffica'', danger threshold to be set),
+frost occurrency ('t_min', threshold: <= 0),
+heat wave ('t_max', danger threshold to be set)
+solar radiation ('uv', threshold: 'descrizione uv'),
+altitude, latitude and longitude to join with other data.
+NOTE: Had to exclude altitude, latitude, longitude
+because I could not handle them in a Spark dataframe
 TypeError: field latitude: Can not merge type <class 'pyspark.sql.types.StringType'> and <class 'pyspark.sql.types.DoubleType'>
 '''
 import csv
 import requests
-import pprint
 
-pp = pprint.PrettyPrinter(sort_dicts = False)
-
-filepath = '/home/giovanni/Scrivania/documentazione3b/loc_gb.csv'
+filepath = '/home/giovanni/Scrivania/documentazione3b/loc_gb.csv' #to put in 'requirements'(?)
 
 class meteo_connector:
    def __init__(self, mypath):
@@ -77,7 +74,6 @@ class meteo_connector:
 
        return res
 
-my_connector = meteo_connector(filepath)
+#my_connector = meteo_connector(filepath)
 #print(type(my_connector.info_dict()))
 #print(my_connector.info_dict().items())
-#pp.pprint(my_connector.info_dict())
