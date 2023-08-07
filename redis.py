@@ -3,10 +3,7 @@ The aim is to store in Redis the final
 dataframe containing the computed risks for
 each city. The df will be stored in form of
 document. It is possible both store and
-query the document through Redis OM.
-Better thing would be to be able to fetch
-from redis single rows for single city risk.
-Maybe different implementation to do that
+query the document for all cities or one city
 '''
 from meteo import meteo_connector
 from meteo_spark import Spark_session
