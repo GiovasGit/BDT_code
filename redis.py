@@ -25,3 +25,23 @@ modified_rows = session.modify_rows(rows) #tuples!
 df = session.final_df(modified_rows) #dataframe to be converted to json
 #df.show()
 
+def df_json(my_df):
+    res = {}
+    json_str =  my_df.toJSON().collect() #list of JSON strings
+    for my_json in json_str:
+        json_dict = json.loads(my_json)
+        res[json_dict['city']] = json_dict
+    return res
+
+#print(df_json(df))
+
+data = df_json(df)
+
+#print(data)
+
+r = redis.Redis(host='localhost', port=6379, db=0)
+r.json().set('doc', '$', data) #putting data into redis
+doc = r.json().get('doc', '$') #instantiating a variable with all data
+
+print(doc) #retrieving all data
+#aberdeen = r.json().get('doc', '$.Aberdeen')
