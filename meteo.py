@@ -12,8 +12,6 @@ TypeError: field latitude: Can not merge type <class 'pyspark.sql.types.StringTy
 import csv
 import requests
 
-filepath = '/home/giovanni/Scrivania/documentazione3b/loc_gb.csv' #to put in 'requirements'(?)
-
 class meteo_connector:
    def __init__(self, mypath):
        self.mypath = mypath
@@ -73,7 +71,3 @@ class meteo_connector:
                res[city_name] = value_dict
 
        return res
-
-#my_connector = meteo_connector(filepath)
-#print(type(my_connector.info_dict()))
-#print(my_connector.info_dict().items())
