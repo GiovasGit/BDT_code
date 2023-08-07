@@ -59,7 +59,6 @@ class Spark_session:
     def final_df(self, my_modified_rows):
         schema = ('city', 'min_temp', 'max_temp', 'radiations', 'wind_kmh')
         the_df = Spark_session().start_session().createDataFrame(my_modified_rows, schema)
-
         return the_df
 
     def stop_session(self):
