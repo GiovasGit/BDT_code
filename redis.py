@@ -2,7 +2,7 @@
 The aim is to store in Redis the final
 dataframe containing the computed risks for
 each city. The df will be stored in form of
-document. It is possible toquery the document
+document. It is possible to query the document
 for all cities or one city.
 '''
 from meteo import meteo_connector
