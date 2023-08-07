@@ -4,7 +4,7 @@ wind 'strength' ('raffica'', danger threshold to be set),
 frost occurrency ('t_min', threshold: <= 0),
 heat wave ('t_max', danger threshold to be set)
 solar radiation ('uv', threshold: 'descrizione uv'),
-altitude, latitude and longitude to join with other data.
+altitude, latitude and longitude to join with possible other data.
 NOTE: Had to exclude altitude, latitude, longitude
 because I could not handle them in a Spark dataframe
 TypeError: field latitude: Can not merge type <class 'pyspark.sql.types.StringType'> and <class 'pyspark.sql.types.DoubleType'>
