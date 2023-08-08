@@ -1,6 +1,6 @@
 '''
 Computations in Spark. The original idea was to
-Put in a dataframe the data coming from meteo.py script,
+Put in a dataframe the data coming from weather.py script,
 then modify this dataframe in Spark putting 1 into the
 cells containing risk values higher than their threshold,
 0 otherwise. But I was not able to modify the Spark df
@@ -9,13 +9,14 @@ point is that I believe that this is like using Python
 as the ourput of the Rows modifications are simple tuples.
 A way to perform the original idea should be implemented
 '''
+import os
 from pyspark.sql import SparkSession
 from pyspark.sql import Row
-from meteo import meteo_connector
+from BDT_code.connectors.weather import meteo_connector, filepath
 
 # from pyspark.sql.types import StructType, StructField, StringType
 
-filepath = '/home/giovanni/Scrivania/documentazione3b/loc_gb.csv' #to put in  'requirements'(?)
+
 my_connector = meteo_connector(filepath)
 diz = my_connector.info_dict()
 
@@ -72,15 +73,16 @@ class Spark_session:
         spark_stop = SparkSession.stop()
         return spark_stop
 
+
 session = Spark_session()
 # start session
-session.start_session()
+spark = session.start_session()
 # create list of Rows
 rows = session.from_dict_to_rows(diz)
-# create list of modified rows that now are tuples. Let's hope it will transform them into a df
+# create list of modified rows that now are tuples.
 modified_rows = session.modify_rows(rows) #tuples!
 # create final df, show it
 df = session.final_df(modified_rows)
 df.show()
 # stop session
-#session.stop_session()
+spark.stop()

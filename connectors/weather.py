@@ -9,10 +9,13 @@ NOTE: Had to exclude altitude, latitude, longitude
 because I could not handle them in a Spark dataframe
 TypeError: field latitude: Can not merge type <class 'pyspark.sql.types.StringType'> and <class 'pyspark.sql.types.DoubleType'>
 '''
-import csv
+
+import csv, os
 import requests
 
-filepath = '/home/giovanni/Scrivania/documentazione3b/loc_gb.csv' #to put in 'requirements'(?)
+script_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print(script_directory)
+filepath = os.path.join(script_directory, "documentazione3b", "loc_gb.csv")
 
 class meteo_connector:
    def __init__(self, mypath):
@@ -33,10 +36,9 @@ class meteo_connector:
 
    def info_dict(self):
        '''
-       returns dictionary with
-       location names as keys,
-       dictionary with id and PAOI
-       as value.
+       Return dictionary with
+       location names as:
+       {keys: {id:PAOI}}
        '''
        res =  {}
        for id in self.ids_cities():
