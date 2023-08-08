@@ -6,7 +6,7 @@ cells containing risk values higher than their threshold,
 0 otherwise. But I was not able to modify the Spark df
 so I performed the changes on Spark Row objects. The
 point is that I believe that this is like using Python
-as the ourput of the Rows modifications are simple tuples.
+as the output of the Rows modifications are simple tuples.
 A way to perform the original idea should be implemented
 '''
 import os
@@ -21,28 +21,32 @@ my_connector = meteo_connector(filepath)
 diz = my_connector.info_dict()
 
 class Spark_session:
+
+    def __init__(self):
+        self.spark = None
+
     def start_session(self):
         '''
-        starts Spark session
+        initalize Spark session
         '''
-        spark = SparkSession.builder.getOrCreate()
-        return spark
+        self.spark = SparkSession.builder.getOrCreate()
+        self.spark.sparkContext.setLogLevel("ERROR")  # Set log level to ERROR
+        return self.spark
 
     def from_dict_to_rows(self, my_dict):
         '''
-        from dictionary to Spark
-        Rows (check the Row data
-        structure/object in the docs)
+        from dictionary to Spark Rows,
+        check the Row data's structure
+        or object in the docs)
         '''
-        # Convert the dictionary to a list of Row objects
         the_rows = [Row(city=key, **values) for key, values in my_dict.items()]
         return the_rows
 
     def modify_rows(self, my_rows):
         '''
         function to modify all rows.
-        Returns a list with the
-        modified rows (list of tuples)
+        Returns a list with modified
+        rows as list of tuples.
         '''
         res = []
         for row in my_rows:
@@ -66,23 +70,8 @@ class Spark_session:
     def final_df(self, my_modified_rows):
         schema = ('city', 'min_temp', 'max_temp', 'radiations', 'wind_kmh')
         the_df = Spark_session().start_session().createDataFrame(my_modified_rows, schema)
-
         return the_df
 
     def stop_session(self):
         spark_stop = SparkSession.stop()
         return spark_stop
-
-
-session = Spark_session()
-# start session
-spark = session.start_session()
-# create list of Rows
-rows = session.from_dict_to_rows(diz)
-# create list of modified rows that now are tuples.
-modified_rows = session.modify_rows(rows) #tuples!
-# create final df, show it
-df = session.final_df(modified_rows)
-df.show()
-# stop session
-spark.stop()

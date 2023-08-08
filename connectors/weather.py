@@ -40,7 +40,7 @@ class meteo_connector:
        location names as:
        {keys: {id:PAOI}}
        '''
-       res =  {}
+       res={}
        for id in self.ids_cities():
            url = f'https://api.3bmeteo.com/publicv3/bollettino_meteo/previsioni_localita/{id}/1/en/daily/1?format=json2&X-API-KEY=0iMs6figaXNyc8JxnrMHQyqvYrSNh3WuoFvIZkXn'
 

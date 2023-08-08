@@ -6,36 +6,25 @@ document. It is possible to query the document
 for all cities or one city.
 '''
 import json
-from BDT_code.connectors.weather import meteo_connector, filepath
-from BDT_code.data_model.meteo_spark import Spark_session
-from BDT_code.redis_configuration.redis_operations import RedisOperations
+from BDT_code.redis_configuration.data_conversion import DataPreparation
+from BDT_code.redis_configuration.redis_operations import RedIngestion
 
+RedIngestion.store_data()
 
-my_connector = meteo_connector(filepath)
+city_demo = "To obtain city-specific results, please insert one of the following locations" + \
+             " or find out from the official documentation which cities that we did not list here we have data on." + \
+             "Birmingham, Cambridge, Cardiff, London"
+print(city_demo)
+user_input = input("Enter a city: ")
 
-diz = my_connector.info_dict()
+print(f"You entered {user_input}.")
 
-# Spark dataframe
-session = Spark_session()
-session.start_session()
-rows = session.from_dict_to_rows(diz)
-modified_rows = session.modify_rows(rows) #tuples!
-df = session.final_df(modified_rows) #dataframe to be converted to json
-#df.show()
+result = RedIngestion.retrieve_city_data(user_input)
 
-def df_json(my_df):
-    res = {}
-    json_str =  my_df.toJSON().collect() #list of JSON strings
-    for my_json in json_str:
-        json_dict = json.loads(my_json)
-        res[json_dict['city']] = json_dict
-    return res
+if result:
+    city_data = json.loads(result)
+    print(f"Data for {user_input}:\n", json.dumps(city_data, indent=4))
+else:
+    print(f"No data found for {user_input}.")
 
-#print(df_json(df))
-data = df_json(df)
-#print(data)
-
-r_ops = RedisOperations()
-r_ops.store_data(data)
-doc = r_ops.retrieve_data()
 
