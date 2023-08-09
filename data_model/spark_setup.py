@@ -9,9 +9,9 @@ point is that I believe that this is like using Python
 as the output of the Rows modifications are simple tuples.
 A way to perform the original idea should be implemented
 '''
-import os
 from pyspark.sql import SparkSession
 from pyspark.sql import Row
+from datetime import datetime
 from BDT_code.connectors.weather import meteo_connector, filepath
 
 # from pyspark.sql.types import StructType, StructField, StringType
@@ -69,7 +69,6 @@ class Spark_session:
                                    'wind_kmh': wind_kmh_modified
                                }}
             '''
-        print("INFO: Dichotomization finished.")
         return res
 
     def final_df(self, my_modified_rows):

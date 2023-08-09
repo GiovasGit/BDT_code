@@ -1,4 +1,6 @@
 import requests
+from tqdm import tqdm
+from datetime import datetime
 from bs4 import BeautifulSoup
 '''
 All raw data is stored in an xml tree-like structure.
@@ -16,7 +18,8 @@ if response.status_code == 200:  # 200 is desired availability
     # Parse the XML semi-structured content using BeautifulSoup
     soup = BeautifulSoup(response.content, 'xml')
     descriptions = soup.findAll("description")
-    for item in descriptions:
+    print(f"{datetime.now()} (INFO): Connecting to UK Earthquakes API:")
+    for item in tqdm(descriptions):
         item = str(item)
         if ";" not in item:
             continue
