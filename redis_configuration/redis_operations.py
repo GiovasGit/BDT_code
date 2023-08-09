@@ -1,6 +1,8 @@
-import json
-from rejson import Path, Client
 
+from rejson import Path, Client
+import json
+from BDT_code.redis_configuration.data_conversion import DataPreparation
+from BDT_code.connectors.weather import filepath
 
 class RedIngestion:
 
@@ -13,7 +15,7 @@ class RedIngestion:
             data in a json or bit-like object
         '''
         self.rj.jsonset('doc', Path.rootPath(), data)
-        print("Data was successfully stored via Redis.")
+        print("INFO: Data was successfully stored via Redis.")
 
     def retrieve_city_data(self, city_name):
         '''
@@ -22,10 +24,34 @@ class RedIngestion:
 
         Returns: json-like dictionary.
         '''
-        result = self.rj.jsonget('doc', f".$.{city_name.capitalize().strip()}")
+        # TO IMPROVE
+        query = city_name.lower().strip()
+        result = self.rj.jsonget('doc', f'.{query}')
+
         if result:
-            return json.loads(result)
+            return result
         else:
             return None
+    def retrieve_all_city_data(self):
+        result = self.rj.jsonget('doc', "$")
+        if result:
+            return result
+        else:
+            return None
+    def RetrieveCityData_python_way(self, city_name):
+        query = city_name.lower().strip()
+        result = self.rj.jsonget("doc", "$", "")
+        for element in result:
+            print(result)
 
-RedIngestion()
+data_prep = DataPreparation(filepath)
+red_ingestion = RedIngestion()
+
+data_prep.prepare_data()
+
+data_json = data_prep.df_to_dict()
+print(type(data_json))
+red_ingestion.store_data(data_json)
+
+print(red_ingestion.retrieve_city_data('London'))
+

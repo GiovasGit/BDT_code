@@ -16,10 +16,6 @@ from BDT_code.connectors.weather import meteo_connector, filepath
 
 # from pyspark.sql.types import StructType, StructField, StringType
 
-
-my_connector = meteo_connector(filepath)
-diz = my_connector.info_dict()
-
 class Spark_session:
 
     def __init__(self):
@@ -35,19 +31,19 @@ class Spark_session:
 
     def from_dict_to_rows(self, my_dict):
         '''
-        from dictionary to Spark Rows,
-        check the Row data's structure
-        or object in the docs)
+        turns a dictionary to Spark Rows
         '''
-        the_rows = [Row(city=key, **values) for key, values in my_dict.items()]
+        the_rows = []
+        for key, values in my_dict.items():
+            the_rows.append(Row(city=key, **values))
         return the_rows
-
-    def modify_rows(self, my_rows):
+    def modify_rows(self, my_rows) -> list:
         '''
-        function to modify all rows.
-        Returns a list with modified
+        Dichotomizing values related to it being a risk or not.
+        It returns a list with modified
         rows as list of tuples.
         '''
+
         res = []
         for row in my_rows:
             # Extract values from the row
@@ -61,10 +57,19 @@ class Spark_session:
             min_temp_modified = 1 if min_temp <= 0 else 0
             max_temp_modified = 1 if max_temp >= 35 else 0
             radiations_modified = 1 if radiations in ('high', 'very high') else 0
-            wind_kmh_modified = 1 if wind_kmh >= 100 else 0
-
+            wind_kmh_modified = 1 if wind_kmh >= 50 else 0
+            # adding as a row into res
             res.append((city, min_temp_modified, max_temp_modified, radiations_modified, wind_kmh_modified))
-
+            '''
+            {city:
+                               {
+                                   'min_temp': min_temp_modified,
+                                   'max_temp': max_temp_modified,
+                                   'radiations': radiations_modified,
+                                   'wind_kmh': wind_kmh_modified
+                               }}
+            '''
+        print("INFO: Dichotomization finished.")
         return res
 
     def final_df(self, my_modified_rows):
@@ -72,6 +77,12 @@ class Spark_session:
         the_df = Spark_session().start_session().createDataFrame(my_modified_rows, schema)
         return the_df
 
-    def stop_session(self):
-        spark_stop = SparkSession.stop()
-        return spark_stop
+    def quietate(self):
+        self.spark.stop()
+
+
+session = Spark_session()
+session.start_session()
+
+
+

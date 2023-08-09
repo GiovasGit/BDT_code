@@ -10,7 +10,7 @@ because I could not handle them in a Spark dataframe
 TypeError: field latitude: Can not merge type <class 'pyspark.sql.types.StringType'> and <class 'pyspark.sql.types.DoubleType'>
 '''
 
-import csv, os
+import csv, os, datetime
 import requests
 
 script_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -43,14 +43,11 @@ class meteo_connector:
        res={}
        for id in self.ids_cities():
            url = f'https://api.3bmeteo.com/publicv3/bollettino_meteo/previsioni_localita/{id}/1/en/daily/1?format=json2&X-API-KEY=0iMs6figaXNyc8JxnrMHQyqvYrSNh3WuoFvIZkXn'
-
            response = requests.get(url)
            if response.status_code == 200:
                city_dict = response.json()
-
                #preparing key of the final dict
                city_name = city_dict['localita']['localita'] #KEY of the FINAL dict
-
                #creating the dict to be used as VALUE of the FINAL dict
                value_dict = {}
                city_id = city_dict['localita']['id'] #as value of the value_dict
@@ -71,9 +68,8 @@ class meteo_connector:
                value_dict['max_temp'] = city_tmax
                value_dict['radiations'] = city_uv
                value_dict['wind_kmh'] = city_wind
-
                res[city_name] = value_dict
-
+       print(f"")
        return res
 
 #my_connector = meteo_connector(filepath)
