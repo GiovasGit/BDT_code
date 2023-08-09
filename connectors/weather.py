@@ -45,7 +45,7 @@ class meteo_connector:
         {keys: {id:PAOI}}
         '''
         res={}
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} (INFO): Connecting to 3bMeteo API:")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} (INFO) Connecting to 3bMeteo API:")
         for id in tqdm(self.ids_cities()):
             url = f'https://api.3bmeteo.com/publicv3/bollettino_meteo/previsioni_localita/{id}/1/en/daily/1?format=json2&X-API-KEY=0iMs6figaXNyc8JxnrMHQyqvYrSNh3WuoFvIZkXn'
             response = requests.get(url)

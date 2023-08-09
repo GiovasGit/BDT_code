@@ -30,18 +30,19 @@ class Lookup:
 
     def insert_location(self):
         user_input = input("Enter a city: ")
-        print(f"You entered {user_input}.")
         return user_input
 
     def lookup(self, loc):
         result = red_ingestion.retrieve_location_data(loc)
         if result:
-            print(f"Data for {result['city']}:")
-            for key, value in result:
-                if value:   #this prints when value == 1
-                    print()
+            list_of_risks = []
+            for key, value in result.items():
+                if key != 'city' and value:   #this prints when value == 1 and key is not 'city' (not needed)
+                    list_of_risks.append(human_readable[key])
+            print(f"The risks for {result['city']} are: " + '; '.join(list_of_risks).capitalize())
+
         else:
-            print(f"No data found for {loc.capitalize()}")
+            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ERROR No data found for {loc.capitalize()}")
             print(":(")
 
 

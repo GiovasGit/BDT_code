@@ -1,6 +1,6 @@
 
 from rejson import Path, Client
-import json
+from datetime import datetime
 from BDT_code.redis_configuration.data_conversion import DataPreparation
 from BDT_code.connectors.weather import filepath
 
@@ -15,7 +15,7 @@ class RedIngestion:
             data in a json or bit-like object
         '''
         self.rj.jsonset('doc', Path.rootPath(), data)
-        print("INFO: Data was successfully stored via Redis.")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} INFO Data was successfully stored via Redis.")
 
     def retrieve_location_data(self, city_name):
         '''
