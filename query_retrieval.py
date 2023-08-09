@@ -45,7 +45,7 @@ class Lookup:
             print(":(")
 
 
-#do not mind the following, it translates variable names into human readable names for risks
+#do not mind the following, it's to translate variable names into human readable names for risks
 human_readable = {'min_temp': 'minimum temperature',
                   'max_temp': 'maximum temperature',
                   'radiations': 'solar radiation',
