@@ -1,8 +1,6 @@
 
 from rejson import Path, Client
 from datetime import datetime
-from BDT_code.redis_configuration.data_conversion import DataPreparation
-from BDT_code.connectors.weather import filepath
 
 class RedIngestion:
 

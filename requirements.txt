@@ -1,0 +1,7 @@
+beautifulsoup4==4.12.2
+bs4==0.0.1
+rejson==0.5.6
+requests==2.28.1
+pyspark==3.4.1
+tqdm==4.66.0
+redis==3.5.3
