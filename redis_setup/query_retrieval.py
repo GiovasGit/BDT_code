@@ -11,54 +11,81 @@ from BDT_code.redis_configuration.redis_operations import RedIngestion
 from BDT_code.redis_configuration.data_conversion import DataPreparation
 from BDT_code.connectors.weather import filepath
 from datetime import datetime
-'''
-#Putting data in a format that Redis will use without freaking out:
 
-
-#Storing the data into Redis
-
-'''
-#Starting location lookup.
+# Starting location lookup.
 class Lookup:
     def __init__(self):
 
-        self.data_prep = DataPreparation(filepath)
+        self.data_prep = DataPreparation()
         self.data_prep.prepare_data()
 
         self.red_ingestion = RedIngestion()
         data_json = self.data_prep.df_to_dict()
         self.red_ingestion.store_data(data_json)
 
-        city_demo = "To obtain city-specific results, please insert one location." + \
-             "Find out from the documentation which cities are available but not list below." + \
-             "Examples: Birmingham, Cambridge, Cardiff, London"
+        self.list_of_risks = set()  # it's a set as to avoid doubles in the risk list
+        self.result = None
+
+        # A list of riskiest locations is being built.
+        self.summary = None
+        self.summarise()
+
+        city_demo = "To obtain city-specific results, please insert one location.\n" + \
+                    "Find out from the documentation which cities are available but not list below.\n" + \
+                    "\tExamples: Birmingham, Cambridge, Cardiff, London"
         print(city_demo)
         self.lookup(self.insert_location())
 
-    def insert_location(self):
+    @staticmethod
+    def insert_location():
         user_input = input("Enter a city: ")
         return user_input
 
-    class NoDataFoundException(Exception):
-        pass
+    def summarise(self):
+        self.summary = self.red_ingestion.retrieve_all_location_data()
+        print(self.summary)
 
     def lookup(self, loc):
+
         try:
-            result = self.red_ingestion.retrieve_location_data(loc)
-            if result:
-                list_of_risks = []
-                for key, value in result.items():
-                    if key != 'city' and value:  # this prints when value == 1 and key is not 'city' (not needed)
-                        list_of_risks.append(human_readable[key])
-                print(f"The risks for {result['city']} are: " + '; '.join(list_of_risks).capitalize())
+            self.result = self.red_ingestion.retrieve_location_data(loc)
+            # To add: by using geofunctions in Redis, a radius of the user's CHOICE could be selected to show up
+            # next to what was requested by the user: if I look up for a city, I'd think that close cities experience
+            # similar risks, so our program should at least think similarly.
+            for key, value in self.result.items():
+                to_avoid = ['city', 'altitude', 'longitude', 'latitude']
+                if key not in to_avoid and value:  # this prints when value == True and key is not 'city' (not needed)
+                    self.list_of_risks.add(human_readable[key])
+
+            if "; ".join(self.list_of_risks) == "solar radiation":
+                # during the writing of this code, so many cities only had "high uv" risk. We had to do this.
+                print("Bring sunscreen!")
+
+            print(f"The risks for {self.result['city']} are: " + '; '.join(self.list_of_risks))
+
+            self.more_lookup(input("Lookup another location? Use Y for yes, or N to exit the program.\n").lower().strip())
 
         except redis.exceptions.ResponseError:
-            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ERROR No data found for {loc.capitalize()}" + "\n :(")
+            print(
+                f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} (ERROR) No data found for {loc.capitalize()}" +\
+                "\n :(")
+            self.more_lookup(input("Lookup another location? Use Y for yes, or N to exit the program.\n").lower().strip())
 
-#do not mind the following, it's to translate variable names into human readable names for risks
+    def more_lookup(self, another_input):
+
+        if another_input == 'y' and len(another_input) == 1:
+            self.lookup(self.insert_location())
+        elif another_input == 'n' and len(another_input) == 1:
+            print("Remember to close your Redis server; goodbye!\n" + \
+                  "Closing...")
+            exit()
+        else:
+            self.more_lookup(input("Please indicate a valid response; Y for yes, and N for no.\n").lower().strip())
+
+# the following is to translate variable names into human-readable names for risks
 human_readable = {'min_temp': 'minimum temperature',
                   'max_temp': 'maximum temperature',
                   'radiations': 'solar radiation',
-                  'wind_kmh':'wind gusts above 50 km/h'}
-
-Lookup()
+                  'wind_kmh': 'wind gusts above 50 km/h',
+                  'hr': 'high humidity',
+                  'prec': 'precipitation'}

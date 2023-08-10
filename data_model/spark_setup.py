@@ -26,6 +26,8 @@ A way to perform the original idea should be implemented
 
 from pyspark.sql import SparkSession
 from pyspark.sql import Row
+from pyspark.sql.functions import col
+from pyspark.sql.types import StructType, StructField, StringType, BooleanType, IntegerType, DoubleType, FloatType
 from datetime import datetime
 from BDT_code.connectors.weather import meteo_connector, filepath
 from BDT_code.connectors.earthquake import earthquake_connector
@@ -43,13 +45,19 @@ class Spark_session:
         initalize Spark session
         '''
         self.spark = SparkSession.builder.getOrCreate()
-        self.spark.sparkContext.setLogLevel("ERROR")  # Set log level to ERROR
         return self.spark
 
     def from_dict_to_rows(self, my_dict):
         '''
         turns a dictionary to Spark Rows
         '''
+        ''' 
+        in Spark:
+        [ Row(city, min_temp_modified, max_temp_modified, radiations_modified, wind_kmh_modified),
+          Row(...)           
+            ]
+        '''
+
         the_rows = []
         for key, values in my_dict.items():
             the_rows.append(Row(city=key, **values))
@@ -61,7 +69,6 @@ class Spark_session:
         It returns a list with modified
         rows as list of tuples.
         '''
-
         res = []
         for row in my_rows:
             # Extract values from the row
@@ -70,36 +77,46 @@ class Spark_session:
             max_temp = row['max_temp']
             radiations = row['radiations']
             wind_kmh = row['wind_kmh']
+            prec = row['prec']
+            hr = row['hr']
+            altitude = row['altitude']
+            latitude = row['latitude']
+            longitude = row['longitude']
+
+            # TO ADD HUMIDITY, PRECIPITATION - rain_mm, hr
 
             # Modify values
-            min_temp_modified = 1 if min_temp <= 0 else 0
-            max_temp_modified = 1 if max_temp >= 35 else 0
-            radiations_modified = 1 if radiations in ('high', 'very high') else 0
-            wind_kmh_modified = 1 if wind_kmh >= 50 else 0
+            min_temp_modified = True if min_temp <= 0 else False
+            max_temp_modified = True if max_temp >= 35 else False
+            radiations_modified = True if radiations in ('high', 'very high') else False
+            wind_kmh_modified = True if wind_kmh >= 50 else False
+            prec_modified = True if prec >= 4.0 else False
+            hr_modified = True if hr >= 70 else False
+            # TO ADD HUMIDITY, PRECIPITATION
+
             # adding as a row into res
-            res.append((city, min_temp_modified, max_temp_modified, radiations_modified, wind_kmh_modified))
-            '''
-            {city:
-                               {   'city': City
-                                   'min_temp': min_temp_modified,
-                                   'max_temp': max_temp_modified,
-                                   'radiations': radiations_modified,
-                                   'wind_kmh': wind_kmh_modified
-                               }}
-            '''
+            res.append((city, min_temp_modified, max_temp_modified, radiations_modified,
+                        wind_kmh_modified, prec, hr, altitude, latitude, longitude))
         return res
 
     def final_df(self, my_modified_rows):
-        schema = ('city', 'min_temp', 'max_temp', 'radiations', 'wind_kmh')
+        schema = StructType([StructField('city', StringType(), True),
+                            StructField('min_temp', BooleanType(), True),
+                            StructField('max_temp', BooleanType(), True),
+                            StructField('radiations', BooleanType(), True),
+                            StructField('wind_kmh', BooleanType(), True),
+                            StructField("prec", FloatType(), True),
+                            StructField("hr", FloatType(), True),
+                            StructField('altitude', IntegerType(), True),
+                            StructField('latitude', FloatType(), True),
+                            StructField('longitude', FloatType(), True)])
         the_df = Spark_session().start_session().createDataFrame(my_modified_rows, schema)
         return the_df
 
     def quietate(self):
         self.spark.stop()
 
-
 session = Spark_session()
 session.start_session()
-
 
 

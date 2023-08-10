@@ -32,7 +32,7 @@ class earthquake_connector:
         soup = BeautifulSoup(self.response.content, 'xml')
         descriptions = soup.findAll("description")
         raw_data = dict()
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} (INFO) Connecting to UK Earthquakes API:")
+        print(f"{datetime.now().strftime('%Y/%m/%d %H:%M:%S')} (INFO) Connecting to UK Earthquakes API:")
 
         for item in tqdm(descriptions):
             item = str(item)

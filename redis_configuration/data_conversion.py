@@ -4,16 +4,16 @@ from BDT_code.connectors.weather import meteo_connector, filepath
 from BDT_code.data_model.spark_setup import Spark_session
 
 class DataPreparation:
-    def __init__(self, connector_path):
+    def __init__(self):
         self.connector_path = filepath
         self.diz = None
         self.df = None
 
     def prepare_data(self):
-        self.fetch_data()
+        self.fetch_ids()
         self.process_data()
 
-    def fetch_data(self):
+    def fetch_ids(self):
         self.diz = meteo_connector(self.connector_path).info_dict()
 
     def process_data(self):
@@ -31,6 +31,8 @@ class DataPreparation:
                 node = json.loads(element)
                 lookable_dictionary[node['city'].lower()] = node
         return lookable_dictionary
+
+
 
 #data_prep = DataPreparation(filepath)
 #data_prep.prepare_data()
