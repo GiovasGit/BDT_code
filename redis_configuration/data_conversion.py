@@ -1,7 +1,7 @@
 import json
 
 from BDT_code.connectors.weather import meteo_connector, filepath
-from BDT_code.data_model.spark_setup import Spark_session
+from BDT_code.spark_data_model.spark_storage import Spark_session
 
 class DataPreparation:
     def __init__(self):

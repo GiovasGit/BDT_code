@@ -5,3 +5,4 @@ requests==2.28.1
 pyspark==3.4.1
 tqdm==4.66.0
 redis==3.5.3
+confluent-kafka==

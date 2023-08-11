@@ -119,4 +119,3 @@ class Spark_session:
 session = Spark_session()
 session.start_session()
 
-

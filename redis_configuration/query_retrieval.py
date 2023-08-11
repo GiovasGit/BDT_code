@@ -49,9 +49,9 @@ class Lookup:
 
         try:
             self.result = self.red_ingestion.retrieve_location_data(loc)
-            # To add: by using geofunctions in Redis, a radius of the user's CHOICE could be selected to show up
+            # TO DO: by using geofunctions in Redis, a radius of the user's CHOICE could be selected to show up
             # next to what was requested by the user: if I look up for a city, I'd think that close cities experience
-            # similar risks, so our program should at least think similarly.
+            # similar risks, so our program should at least act accordingly.
             for key, value in self.result.items():
                 to_avoid = ['city', 'altitude', 'longitude', 'latitude']
                 if key not in to_avoid and value:  # this prints when value == True and key is not 'city' (not needed)
@@ -88,4 +88,4 @@ human_readable = {'min_temp': 'minimum temperature',
                   'radiations': 'solar radiation',
                   'wind_kmh': 'wind gusts above 50 km/h',
                   'hr': 'high humidity',
-                  'prec': 'precipitation'}
+                  'prec': 'high levels of precipitation'}
